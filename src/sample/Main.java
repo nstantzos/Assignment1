@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import javax.print.attribute.standard.PrinterMessageFromOperator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +73,6 @@ public class Main extends Application
 
             // Calling recursive method
             RecursiveDataDig(arr,0,0, root);
-            int bobdole = 1;
         }
 
         for (Node<String> i: nodeList)
@@ -94,6 +95,12 @@ public class Main extends Application
         }
 
         Node<String> root = nodeList.get(0);
+
+        System.out.println("****************Entering recursive print**************");
+        PrintFileName(root);
+        RecursivePrint(root,0);
+
+
         int totalNodeCount = nodeList.size();
         int nodeCounter = 0;
 
@@ -105,44 +112,63 @@ public class Main extends Application
         launch(args);
     }
 
-    static void RecursiveDataTreePrint(Node<String> node, int index, int level, int totalNodeCount, int nodeCounter)
+    private static void PrintFileName(Node<String> root) {
+        int index = root.NodeName.lastIndexOf("\\");
+        String fileName = root.NodeName.substring(index + 1);
+        if (root.IsFolder)
+        {
+            System.out.println("->" + fileName);
+        }
+        else
+        {
+            System.out.println(fileName);
+        }
+    }
+
+    private static void RecursivePrint(Node<String> root, int depth)
     {
-        if (nodeCounter == totalNodeCount)
+        if (root.getChildren().size() > 0)
         {
-            return;
-        }
-
-        for (int i = 0; i<level; i++)
-        {
-            System.out.println("\t");
-        }
-
-        // If the node has any children (if it is a directory)
-        if (node.getChildren().size()>0)
-        {
-            System.out.println("Folder name: " + node.NodeName);
-            System.out.println("Folder contains: " + node.NumberOfFiles + " files");
-            List<Node<String>> files = node.getChildren();
-            Long byteSize = 0l;
-            if (node.ContainsFiles)
+            for (Node<String> i : root.getChildren())
             {
-                for(Node<String> i : files)
+                if (i.getChildren().size() > 0)
                 {
-                    byteSize += i.FileSize;
+                    int tempDepth = depth;
+                    depth++;
+                    for (int j = 0; j < depth; j++)
+                    {
+                        System.out.print("\t");
+                    }
+                    PrintFileName(i);
+                    RecursivePrint(i,depth);
+                    depth = tempDepth;
                 }
-                System.out.println("File size in folder is: " + byteSize + " bytes");
-                //RecursiveDataTreePrint();
+                else if (i.IsFolder)
+                {
+                    depth++;
+                    for (int j = 0; j < depth; j++)
+                    {
+                        System.out.print("\t");
+                    }
+                    PrintFileName(i);
+                }
+                else
+                {
+                    depth++;
+                    for (int j = 0; j < depth; j++)
+                    {
+                        System.out.print("\t");
+                    }
+                    PrintFileName(i);
+                }
             }
         }
         else
         {
-            System.out.println("File name: " + node.NodeName);
-            System.out.println("File size in bytes: " + node.FileSize);
+
         }
-
-        //RecursiveDataTreePrint(totalNodeCount, ++nodeCounter);
+        return;
     }
-
 
     static void RecursiveDataDig(File[] arr, int index, int level, Node<String> parentNode)
     {
